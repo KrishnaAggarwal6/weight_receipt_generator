@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sangam Cables – Goods Receipt</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #f0ece4;
+    --card: #ffffff;
+    --red: #B91C1C;
+    --dark: #111;
+    --muted: #777;
+    --border: #ddd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 16px 60px;
+  }
+
+  h1.app-title {
+    font-size: 12px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  /* ── FORM ── */
+  .form-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 26px;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    margin-bottom: 24px;
+  }
+
+  .form-card h2 {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--red);
+    padding-bottom: 8px;
+  }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+  .span2 { grid-column: span 2; }
+
+  label {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 8px 11px;
+    border: 1.5px solid var(--border);
+    border-radius: 3px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    color: var(--dark);
+    background: #fafaf8;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--red); background: white; }
+  textarea { resize: vertical; min-height: 56px; font-size: 13px; }
+
+  .weight-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 13px;
+    margin-top: 13px;
+  }
+
+  .net-display {
+    background: var(--dark);
+    color: #fff;
+    padding: 8px 11px;
+    border-radius: 3px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 17px;
+    text-align: center;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 1px;
+  }
+  .net-label { color: #B45309; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; font-weight: 600; }
+
+  .btn-generate {
+    width: 100%;
+    padding: 13px;
+    background: var(--red);
+    color: white;
+    border: none;
+    border-radius: 3px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 18px;
+    transition: background 0.2s;
+  }
+  .btn-generate:hover { background: #991b1b; }
+
+  /* ── RECEIPT PREVIEW AREA ── */
+  #receipt-area { width: 100%; max-width: 520px; display: none; }
+
+  .receipt-page {
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+
+  /* ── THE RECEIPT ── */
+  .receipt {
+    width: 280px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11.5px;
+    color: #111;
+    background: white;
+    padding: 18px 16px 22px;
+    border: 1px dashed #bbb;
+    position: relative;
+  }
+
+  /* torn top edge */
+  .receipt::before {
+    content: '';
+    display: block;
+    height: 8px;
+    background: repeating-linear-gradient(90deg, white 0px, white 6px, var(--bg) 6px, var(--bg) 10px);
+    position: absolute;
+    top: -8px; left: 0; right: 0;
+  }
+  .receipt::after {
+    content: '';
+    display: block;
+    height: 8px;
+    background: repeating-linear-gradient(90deg, white 0px, white 6px, var(--bg) 6px, var(--bg) 10px);
+    position: absolute;
+    bottom: -8px; left: 0; right: 0;
+  }
+
+  .r-center { text-align: center; }
+  .r-company { font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+  .r-subtitle { font-size: 9.5px; letter-spacing: 2px; color: #555; text-transform: uppercase; margin-top: 2px; }
+  .r-divider { border: none; border-top: 1px dashed #999; margin: 10px 0; }
+  .r-divider-solid { border: none; border-top: 1px solid #333; margin: 10px 0; }
+
+  .r-row { display: flex; justify-content: space-between; margin: 3px 0; font-size: 11px; }
+  .r-label { color: #555; }
+  .r-value { font-weight: normal; text-align: right; max-width: 160px; word-break: break-word; }
+
+  .r-section-title {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #999;
+    margin: 8px 0 4px;
+  }
+
+  .r-weight-block {
+    background: #f5f5f0;
+    border: 1px solid #ddd;
+    padding: 8px 10px;
+    margin: 8px 0;
+    border-radius: 2px;
+  }
+
+  .r-net-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-top: 1px solid #333;
+    margin-top: 6px;
+    padding-top: 5px;
+  }
+  .r-net-label { font-size: 12px; font-weight: bold; letter-spacing: 1px; }
+  .r-net-val { font-size: 18px; font-weight: bold; letter-spacing: 1px; }
+
+  .r-stamp {
+    text-align: center;
+    margin: 12px 0 4px;
+    padding: 6px;
+    border: 2px solid #111;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .r-sig {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 18px;
+    gap: 14px;
+  }
+  .r-sig-box { flex: 1; text-align: center; }
+  .r-sig-line { border-top: 1px solid #333; margin-bottom: 4px; margin-top: 20px; }
+  .r-sig-lbl { font-size: 8.5px; letter-spacing: 1px; text-transform: uppercase; color: #777; }
+
+  .r-footer { text-align: center; margin-top: 12px; font-size: 9.5px; color: #aaa; letter-spacing: 1px; }
+
+  .r-slip-no {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    color: #999;
+    letter-spacing: 1px;
+  }
+
+  /* ── ACTIONS ── */
+  .action-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    width: 100%;
+  }
+  .btn-new, .btn-print {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 3px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-new { background: white; color: var(--red); border: 2px solid var(--red); }
+  .btn-new:hover { background: #fff5f5; }
+  .btn-print { background: #111; color: white; }
+  .btn-print:hover { background: #333; }
+
+  /* ── PRINT ── */
+  @media print {
+    @page { size: A4; margin: 10mm; }
+    body { background: white; padding: 0; }
+    .form-card, .app-title, .action-row { display: none !important; }
+    #receipt-area { display: flex !important; max-width: 100%; }
+    .receipt-page {
+      border: none;
+      box-shadow: none;
+      padding: 0;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 10mm;
+      align-items: flex-start;
+    }
+    .receipt { border: 1px dashed #bbb; break-inside: avoid; }
+    .receipt::before, .receipt::after { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<h1 class="app-title">📦 Goods Receipt Generator</h1>
+
+<!-- FORM -->
+<div class="form-card" id="form-card">
+  <h2>Receipt Details</h2>
+  <div class="grid2">
+    <div class="span2">
+      <label>Company Name</label>
+      <input type="text" id="companyName" value="Sangam Cables" placeholder="Sangam Cables"/>
+    </div>
+    <div>
+      <label>Invoice No.</label>
+      <input type="text" id="receiptNo" placeholder="INV-0001"/>
+    </div>
+    <div>
+      <label>Date & Time</label>
+      <input type="datetime-local" id="datetime"/>
+    </div>
+    <div class="span2">
+      <label>Supplier / Party Name</label>
+      <input type="text" id="party" placeholder="e.g. Vietnam Minerals Co."/>
+    </div>
+    <div class="span2">
+      <label>Material / Goods Description</label>
+      <input type="text" id="material" placeholder="e.g. Calcium Carbonate – Grade A"/>
+    </div>
+    <div>
+      <label>Received By</label>
+      <input type="text" id="receiver" placeholder="e.g. Ramesh Singh"/>
+    </div>
+    <div>
+      <label>Unit</label>
+      <select id="unit">
+        <option value="KG">KG</option>
+        <option value="MT" selected>MT</option>
+        <option value="Quintal">Quintal</option>
+      </select>
+    </div>
+    <div class="span2">
+      <label>Remarks (optional)</label>
+      <textarea id="remarks" placeholder="e.g. Goods received in good condition. Bags intact."></textarea>
+    </div>
+  </div>
+
+  <div class="weight-row" style="grid-template-columns:1fr 1fr; margin-bottom:10px;">
+    <div>
+      <label>Net Weight (you have)</label>
+      <input type="number" id="net" placeholder="0" oninput="calcWeights()"/>
+    </div>
+    <div>
+      <label>% for Gross &amp; Tare</label>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input type="number" id="pct" value="0.32" step="0.01" min="0" style="width:80px;" oninput="calcWeights()"/>
+        <span style="font-size:12px;color:var(--muted);white-space:nowrap;">% of net</span>
+      </div>
+    </div>
+  </div>
+  <div class="weight-row">
+    <div>
+      <div class="net-label">Gross Weight</div>
+      <div class="net-display" id="grossDisplay" style="font-size:14px;">—</div>
+    </div>
+    <div>
+      <div class="net-label">Tare Weight</div>
+      <div class="net-display" id="tareDisplay" style="font-size:14px;">—</div>
+    </div>
+    <div>
+      <div class="net-label" style="color:#86efac;">Net Weight</div>
+      <div class="net-display" id="netDisplay" style="background:#14532d;">—</div>
+    </div>
+  </div>
+
+  <div style="margin-top:13px;">
+    <label>No. of copies to print</label>
+    <select id="copies">
+      <option value="1">1 copy</option>
+      <option value="2" selected>2 copies (recommended)</option>
+      <option value="3">3 copies</option>
+    </select>
+  </div>
+
+  <button class="btn-generate" onclick="generateReceipt()">Generate Receipt →</button>
+</div>
+
+<!-- RECEIPT OUTPUT -->
+<div id="receipt-area">
+  <div class="receipt-page" id="receipt-page">
+    <!-- receipts injected here -->
+  </div>
+  <div class="action-row">
+    <button class="btn-new" onclick="newReceipt()">← New Receipt</button>
+    <button class="btn-print" onclick="window.print()">🖨 Print</button>
+  </div>
+</div>
+
+<script>
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('datetime').value =
+    `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+  // Auto receipt number
+  let counter = parseInt(localStorage.getItem('inv_counter') || '0') + 1;
+  document.getElementById('receiptNo').value = 'INV-' + String(counter).padStart(4,'0');
+
+  function calcWeights() {
+    const net = parseFloat(document.getElementById('net').value) || 0;
+    const pct = parseFloat(document.getElementById('pct').value) || 0;
+    if (net > 0) {
+      const tare  = net * pct / 100;
+      const gross = net + tare;
+      document.getElementById('grossDisplay').textContent = gross.toFixed(3);
+      document.getElementById('tareDisplay').textContent  = tare.toFixed(3);
+      document.getElementById('netDisplay').textContent   = net.toFixed(3);
+    } else {
+      document.getElementById('grossDisplay').textContent = '—';
+      document.getElementById('tareDisplay').textContent  = '—';
+      document.getElementById('netDisplay').textContent   = '—';
+    }
+  }
+
+  function dashes(n) { return '─'.repeat(n); }
+
+  function buildReceipt(data, copyLabel) {
+    const r = document.createElement('div');
+    r.className = 'receipt';
+    r.innerHTML = `
+      <div class="r-center">
+        <div class="r-company">${data.company}</div>
+        <div class="r-subtitle">Goods Received Note</div>
+      </div>
+      <hr class="r-divider-solid"/>
+      <div class="r-row"><span class="r-label">Invoice No.</span><span class="r-value">${data.receiptNo}</span></div>
+      <div class="r-row"><span class="r-label">Date</span><span class="r-value">${data.date}</span></div>
+      <div class="r-row"><span class="r-label">Time</span><span class="r-value">${data.time}</span></div>
+      <hr class="r-divider"/>
+      <div class="r-section-title">Supplier Details</div>
+      <div class="r-row"><span class="r-label">Party</span><span class="r-value">${data.party}</span></div>
+      <div class="r-row"><span class="r-label">Material</span><span class="r-value">${data.material}</span></div>
+      <div class="r-row"><span class="r-label">Received By</span><span class="r-value">${data.receiver}</span></div>
+      <hr class="r-divider"/>
+      <div class="r-section-title">Weight Details</div>
+      <div class="r-weight-block">
+        <div class="r-row"><span class="r-label">Gross Wt.</span><span class="r-value">${data.gross} ${data.unit}</span></div>
+        <div class="r-row"><span class="r-label">Tare Wt.</span><span class="r-value">${data.tare} ${data.unit}</span></div>
+        <div class="r-net-line">
+          <span class="r-net-label">NET WT.</span>
+          <span class="r-net-val">${data.net} ${data.unit}</span>
+        </div>
+      </div>
+      ${data.remarks ? `<hr class="r-divider"/><div class="r-section-title">Remarks</div><div style="font-size:10.5px;line-height:1.5;color:#444;">${data.remarks}</div>` : ''}
+      <div class="r-stamp">✓ GOODS RECEIVED</div>
+      <div class="r-sig">
+        <div class="r-sig-box">
+          <div class="r-sig-line"></div>
+          <div class="r-sig-lbl">Received By</div>
+        </div>
+        <div class="r-sig-box">
+          <div class="r-sig-line"></div>
+          <div class="r-sig-lbl">Supplier / Driver</div>
+        </div>
+      </div>
+      <div class="r-footer">
+        <div style="margin-top:10px;font-size:9px;border-top:1px dashed #ccc;padding-top:6px;">${copyLabel} &nbsp;|&nbsp; ${data.receiptNo}</div>
+      </div>
+    `;
+    return r;
+  }
+
+  function generateReceipt() {
+    const company   = document.getElementById('companyName').value.trim() || 'Company';
+    const receiptNo = document.getElementById('receiptNo').value.trim() || 'GRN-0001';
+    const dtVal     = document.getElementById('datetime').value;
+    const party     = document.getElementById('party').value || '—';
+    const material  = document.getElementById('material').value || '—';
+    const receiver  = document.getElementById('receiver').value || '—';
+    const unit      = document.getElementById('unit').value;
+    const net       = parseFloat(document.getElementById('net').value) || 0;
+    const pct       = parseFloat(document.getElementById('pct').value) || 0;
+    const tare      = net * pct / 100;
+    const gross     = net + tare;
+    const remarks   = document.getElementById('remarks').value.trim();
+    const copies    = parseInt(document.getElementById('copies').value);
+
+    let dateStr = '', timeStr = '';
+    if (dtVal) {
+      const d = new Date(dtVal);
+      dateStr = d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+      timeStr = d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+    }
+
+    const data = {
+      company, receiptNo, date: dateStr, time: timeStr,
+      party, material, receiver, unit,
+      gross: gross.toFixed(3), tare: tare.toFixed(3),
+      net: net > 0 ? net.toFixed(3) : '0.000',
+      remarks
+    };
+
+    const copyLabels = ['ORIGINAL', 'DUPLICATE', 'TRIPLICATE'];
+    const page = document.getElementById('receipt-page');
+    page.innerHTML = '';
+    for (let i = 0; i < copies; i++) {
+      page.appendChild(buildReceipt(data, copyLabels[i] || `COPY ${i+1}`));
+    }
+
+    // Save counter
+    localStorage.setItem('inv_counter', counter);
+    counter++;
+    document.getElementById('receiptNo').value = 'INV-' + String(counter).padStart(4,'0');
+
+    document.getElementById('form-card').style.display = 'none';
+    document.getElementById('receipt-area').style.display = 'block';
+  }
+
+  function newReceipt() {
+    document.getElementById('form-card').style.display = 'block';
+    document.getElementById('receipt-area').style.display = 'none';
+  }
+</script>
+</body>
+</html>
